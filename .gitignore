@@ -16,4 +16,5 @@ Esercizio2/roles/vagrant/vagrant.out
 id_rsa
 id_ed25519
 .vagrant/
-awx/2026*
+
+*VBoxHeadless*.log
