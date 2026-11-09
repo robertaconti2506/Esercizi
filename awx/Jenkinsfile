@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'NOME_FILE', defaultValue: 'example.java',
+               description: 'Nome del sorgente Java ricevuto da AWX')
+        text(name: 'SORGENTE_B64', defaultValue: '',
+             description: 'Contenuto del sorgente, codificato in base64')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('Ricevi artefatto') {
+            steps {
+                script {
+                    if (!params.SORGENTE_B64?.trim()) {
+                        error 'Nessun sorgente ricevuto: il parametro SORGENTE_B64 è vuoto'
+                    }
+                }
+                writeFile file: "${params.NOME_FILE}.b64", text: params.SORGENTE_B64
+                sh '''
+                    base64 -d "${NOME_FILE}.b64" > "${NOME_FILE}"
+                    echo "--- Sorgente ricevuto ---"
+                    cat "${NOME_FILE}"
+                '''
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'javac "${NOME_FILE}"'
+            }
+        }
+
+        stage('Esecuzione') {
+            steps {
+                sh 'java -cp . "$(basename "${NOME_FILE}" .java)"'
+            }
+        }
+    }
+
+    post {
+        success {
+            archiveArtifacts artifacts: '*.java, *.class', fingerprint: true
+        }
+        cleanup {
+            deleteDir()
+        }
+    }
+}

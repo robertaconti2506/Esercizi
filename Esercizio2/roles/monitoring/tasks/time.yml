@@ -1,0 +1,23 @@
+---
+- name: Set system timezone
+  community.general.timezone:
+    name: Europe/Rome
+
+- name: Ensure chronyd is enabled and running
+  ansible.builtin.service:
+    name: chronyd
+    state: started
+    enabled: true
+
+- name: Configure chronyd to allow immediate time correction
+  ansible.builtin.lineinfile:
+    path: /etc/chrony.conf
+    regexp: '^makestep'
+    line: 'makestep 1.0 3'
+    state: present
+  notify: Restart chronyd
+
+- name: Ensure chronyd is synchronized
+  ansible.builtin.service:
+    name: chronyd
+    state: started

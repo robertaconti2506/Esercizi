@@ -1,0 +1,33 @@
+---
+- name: Restart chronyd
+  ansible.builtin.service: 
+    name: chronyd
+    state: restarted
+
+- name: Restart Elasticsearch
+  community.docker.docker_container:
+    name: "{{ monitoring_elasticsearch_container_name }}"
+    state: started
+    restart: true
+
+- name: Restart Grafana
+  community.docker.docker_container:
+    name: "{{ monitoring_grafana_container_name }}"
+    state: started
+    restart: true
+
+- name: Restart Prometheus
+  community.docker.docker_container:
+    name: "{{ monitoring_prometheus_container_name }}"
+    state: started
+    restart: true
+
+- name: Restart Node Exporter
+  ansible.builtin.systemd:
+    name: node_exporter
+    scope: user
+    state: restarted
+  become: true
+  become_user: vagrant
+  environment:
+    XDG_RUNTIME_DIR: /run/user/1000
