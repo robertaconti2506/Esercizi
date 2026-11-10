@@ -4,7 +4,7 @@
   gather_facts: false
 
   vars:
-    sorgente_remoto: /home/vagrant/examplr.java
+    sorgente_remoto: /home/vagrant/example.java
     cartella_locale: /tmp/artefatti
 
   tasks:
@@ -13,8 +13,9 @@
         src: "{{ sorgente_remoto }}"
         dest: "{{ cartella_locale }}/"
         flat: true
+        fail_on_missing: true
 
-    - name: Pubblica il sorgente come artefact del job AWX 
+    - name: Pubblica il sorgente come artifact del job AWX 
       ansible.builtin.set_stats:
         data:
           nome_file: "{{ sorgente_remoto | basename }}"
