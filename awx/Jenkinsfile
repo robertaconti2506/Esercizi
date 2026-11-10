@@ -7,6 +7,20 @@ pipeline {
         text(name: 'SORGENTE_B64', defaultValue: '',
              description: 'Contenuto del sorgente, codificato in base64')
     }
+    
+    triggers {
+	    GenericTrigger(
+	    	genericVariables: [
+			[key: 'NOME_FILE', value: '$.nome_file'],
+			[key: 'SORGENTE_B64', value: '$.sorgente_b64'],
+			[key: 'AWX_JOB_ID', value: '$.awx_job_id', defaultValue: '?']
+	    	],
+	    	tokenCredentialId: 'awx-webhook-token',
+	    	causeString: 'Avviata dal webhook di AWX (job $AWX_JOB_ID)',
+	    	printContributedVariables: false,
+	    	printPostContent: false
+	    )
+    }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
