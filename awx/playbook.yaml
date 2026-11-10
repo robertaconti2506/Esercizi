@@ -1,0 +1,23 @@
+---
+- name: Preleva il sorgente dalla VM e lo pubblica come artifact del job
+  hosts: all
+  gather_facts: false
+
+  vars:
+    sorgente_remoto: /home/vagrant/examplr.java
+    cartella_locale: /tmp/artefatti
+
+  tasks:
+    - name: Preleva il sorgente dalla VM
+      ansible.builtin.fetch:
+        src: "{{ sorgente_remoto }}"
+        dest: "{{ cartella_locale }}/"
+        flat: true
+
+    - name: Pubblica il sorgente come artefact del job AWX 
+      ansible.builtin.set_stats:
+        data:
+          nome_file: "{{ sorgente_remoto | basename }}"
+          sorgente_b64: "{{ lookup('ansible.builtin.file', cartella_locale ~ '/' ~ (sorgente_remoto | basename)) | b64encode }}"
+        per_host: false
+      run_once: true
